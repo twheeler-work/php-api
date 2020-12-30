@@ -1,0 +1,20 @@
+{
+  "require": {
+    "thingengineer/mysqli-database-class": "dev-master",
+    "phpseclib/phpseclib": "~2.0",
+    "box/spout": "^3.1",
+    "spatie/simple-excel": "^1.2",
+    "phpmailer/phpmailer": "^6.1",
+    "icewind/smb": "^3.2",
+    "vlucas/phpdotenv": "^2.4",
+    "nesbot/carbon": "^2.41"
+  },
+  "autoload": {
+    "psr-4": {
+      "Http\\": "app/Http/",
+      "Mail\\": "app/Mail/",
+      "Models\\": "app/Models/",
+      "Utilities\\": "app/Utilities/"
+    }
+  }
+}
