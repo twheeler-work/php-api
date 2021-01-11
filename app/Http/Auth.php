@@ -8,12 +8,8 @@ class Auth
 {
   public static function getToken()
   {
-    // if ($_SERVER && $_SERVER['HTTP_X_AUTH_TOKEN']) {
     $jwt = new JWT();
     return $jwt->createJWT();
-    // } else {
-    //   return http_response_code(401);
-    // }
   }
 
   public static function verifyToken($status = null)

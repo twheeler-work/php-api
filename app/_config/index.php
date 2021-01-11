@@ -28,12 +28,17 @@ define('TABLE', ["leads", "users"]);
 // Set Globals
 ///////////////////////////////
 
+// Set PROD url (Email & CORS)
+$prodURL = 'https://some-site.com'; // <- Don't forget to set this
+
+// Set DEV url (Email)
+$devURL = '';
+
 // DB connection info
 define('DBDATA', include 'db.php');
 
 // Set Session Timeout
-// define('TIMEOUT', 1800); // 30 mins 1800
-define('TIMEOUT', 18000); // 30 mins 1800
+define('TIMEOUT', 18000); // 30 mins 18000
 
 // Set Stage Env
 define('STAGE', true);
@@ -41,25 +46,28 @@ define('STAGE', true);
 // Set local env
 if ($_SERVER["REMOTE_ADDR"] === '127.0.0.1') {
   define('LOCAL', true);
-  define('FRONTEND_URL', '*'); // DEV
 } else {
   define('LOCAL', false);
-  // define('FRONTEND_URL', 'http://projecta.nrg.com'); // PROD
-  define('FRONTEND_URL', '*'); // DEV
 }
 
 // Set the default timezone
 date_default_timezone_set('America/Chicago');
 
 ///////////////////////////////
-// Error Handling
+// Env Handling
 ///////////////////////////////
 
 if (!STAGE) {
+  // PROD
   error_reporting(E_ALL ^ E_WARNING);
+  define('FRONTEND_URL', $prodURL);
+  define('CORS_URL', $prodURL);
 } else {
+  // DEV
   error_reporting(E_ALL);
   ini_set("display_errors", "On");
+  define('FRONTEND_URL', $devURL);
+  define('CORS_URL', '*');
 }
 
 ///////////////////////////////
