@@ -53,6 +53,44 @@ class Request
   }
 
   /** ----------------------------
+   ** Get JSON query
+   * -----------------------------
+   * Get & clean query
+   * @return object $query
+   */
+  public static function json()
+  {
+    try {
+      $json = json_decode(file_get_contents("php://input"), true);
+      if (!empty($json)) {
+        $form = [];
+        foreach ($json as $name => $value) {
+          if (!is_array($value)) {
+            $form[htmlspecialchars($name)] = htmlspecialchars($value);
+          } else {
+            foreach ($value as $n => $v) {
+              if (!is_array($v)) {
+                $form[htmlspecialchars($name)][$n] = htmlspecialchars($v);
+              } else {
+                foreach ($v as $n2 => $v2) {
+                  $form[htmlspecialchars($name)][$n][$n2] = htmlspecialchars(
+                    $v2
+                  );
+                }
+              }
+            }
+          }
+        }
+        return $form;
+      } else {
+        return null;
+      }
+    } catch (Exception $e) {
+      die($e);
+    }
+  }
+
+  /** ----------------------------
    ** Get POST query
    * -----------------------------
    * Get & clean query
@@ -92,17 +130,38 @@ class Request
    * Get & clean POST queries
    * @return array $form
    */
-  public static function allPost($noEmpty = true)
+  public static function allPost()
   {
     try {
       $form = [];
       foreach ($_POST as $name => $value) {
-        $noEmpty
-          ? $value !== "" &&
-            ($form[htmlspecialchars($name)] = htmlspecialchars($value))
-          : ($form[htmlspecialchars($name)] = htmlspecialchars($value));
+        $form[htmlspecialchars($name)] = htmlspecialchars($value);
       }
       return $form;
+    } catch (Exception $e) {
+      die($e);
+    }
+  }
+
+  /** ----------------------------
+   ** Get API parameters
+   * -----------------------------
+   * Get & clean GET queries
+   * @return array $form
+   */
+  public static function getAPI($query)
+  {
+    try {
+      if (isset($_GET[$query])) {
+        $params = explode("/", $_GET[$query]);
+        foreach ($params as $param) {
+          !empty($param) &&
+            ($return[htmlspecialchars($param)] = htmlspecialchars($param));
+        }
+        return isset($return) ? $return : null;
+      } else {
+        return '';
+      }
     } catch (Exception $e) {
       die($e);
     }
@@ -137,7 +196,7 @@ class Request
   }
 
   /** ----------------------------
-   ** Return HTTP_X_AUTH_TOKEN
+   *? Return HTTP_X_AUTH_TOKEN
    * -----------------------------
    * @return string token
    */
@@ -178,106 +237,42 @@ class Request
     }
   }
 
-  /** ---------------------------
-   ** Set timeout
-   * -----------------------------
-   * Set timeout counter for
-   *   session.
-   * @param string $session
-   */
-  private static function timeout()
-  {
-    if (
-      !empty(Session::get('LAST_ACTIVITY')) &&
-      time() - Session::get('LAST_ACTIVITY') > TIMEOUT
-    ) {
-      Session::logout([
-        'success' => 'You have been logged out due to inactivity.',
-      ]);
-      exit();
-    }
-    Session::set('LAST_ACTIVITY', time(), true);
-  }
-
   /** ----------------------------
-   ** Redirect to login
+   ** Set CORS Header
    * -----------------------------
-   * If loggedIn session is false
-   *  set intended URI as session
-   *  & redirect to login page.
+   * OPTIONS:
+   * get -
+   * post -
+   * delete -
    *
-   * @return header login
+   * @param string $type set predefined cors
+   * @return cors header
    */
-  public static function secure()
+  public static function setHeader(string $type)
   {
-    self::timeout();
-    if (empty(Session::get('loggedIn'))) {
-      Session::logout(
-        ['success' => 'You have been successfully logged out.'],
-        true
+    if (isset($type)) {
+      // Defaults
+      header('Access-Control-Allow-Origin:' . CORS_URL);
+      header("Access-Control-Allow-Credentials: true");
+      header("Content-Type: application/json; charset=UTF-8");
+      header(
+        'Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token, Access'
       );
-    }
-  }
-
-  /** ----------------------------
-   ** Continue to intended url
-   * -----------------------------
-   * Capture URI session if set &
-   *  continue after login.
-   *
-   * @return string url
-   */
-  public static function continue()
-  {
-    if (!empty(Session::get('uri'))) {
-      echo Session::get('uri');
     } else {
-      echo "/";
+      header('Access-Control-Allow-Origin: *');
+      header("Content-Type: application/json; charset=UTF-8");
     }
-  }
 
-  /** ---------------------------
-   ** Verify CSRF Token
-   * -----------------------------
-   * Compare session token with
-   *  post token.
-   * @param POST csrf-token
-   * @return bool
-   */
-  public static function verify_token($token = false)
-  {
-    try {
-      !$token && ($token = self::post('csrf-token'));
-      if (!empty(Session::get('auth_token')) && !empty($token)) {
-        if (hash_equals(Session::get('auth_token'), $token)) {
-          return true;
-        }
-      }
-      return false;
-    } catch (Exception $e) {
-      Session::set('status', ['errors' => $e]);
+    if ($type === 'get') {
+      header('Access-Control-Allow-Methods: GET, OPTIONS');
     }
-  }
 
-  /** ---------------------------
-   ** Verify Header Token
-   * -----------------------------
-   * Compare session token with
-   *  header token to
-   *  validate ajax.
-   *
-   * @param HTTP header
-   * @return bool
-   */
-  public static function verify_header()
-  {
-    try {
-      if (self::getXToken() !== Session::get('auth_token')) {
-        Session::unauthorized(['errors' => 'Invalid token!']);
-        http_response_code(401);
-      }
-    } catch (Exception $e) {
-      Session::set('status', ['errors' => $e->getMessage()]);
+    if ($type === 'post') {
+      header('Access-Control-Allow-Methods: POST, OPTIONS');
+    }
+
+    if ($type === 'delete') {
+      header('Access-Control-Allow-Methods: DELETE, OPTIONS');
     }
   }
 }

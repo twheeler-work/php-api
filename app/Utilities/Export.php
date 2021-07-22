@@ -2,20 +2,6 @@
 
 namespace Utilities;
 
-/** ------------------------------
- ** Get all db values
- * -------------------------------
- ** Call class
- * -------------------------------
- *TODO echo results to browser
- *
- * $entries = $db->get($table[0]);
- *
- * $export = new Export($entries, "filename");
- *
- * echo $export->csv();
- */
-
 class Export
 {
   protected $data;

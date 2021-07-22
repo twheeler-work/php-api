@@ -1,0 +1,3 @@
+RewriteEngine On
+RewriteRule ^([^/d]+)/?$ index.php?mode=$1 [QSA]
+

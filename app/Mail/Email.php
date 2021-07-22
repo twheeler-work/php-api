@@ -10,8 +10,8 @@ class Email
 {
   // SMTP Variables
   // --------------------------------------------------------------------
-  private $fromEmail = 'thomas.wheeler@nrg.com'; // This address must be verified with Amazon SES.
-  private $host = 'email-smtp.us-east-1.amazonaws.com'; // Specify main and backup SMTP servers
+  private $fromEmail = 'thomas.wheeler@nrg.com'; // Sending address
+  private $host = 'email-smtp.us-east-1.amazonaws.com'; // Specify main SMTP server
   private $port = 587; // TCP port to connect to
   private $SMTPAuth = true; // Enable SMTP authentication
   private $SMTPSecure = 'tls'; // Enable TLS encryption, `ssl` also accepted
@@ -33,75 +33,31 @@ class Email
     $this->mail->SMTPDebug = $this->SMTPDebug;
   }
 
-  public function forgotPassword(array $values)
+  /** -----------------------------------
+   ** Demo email
+   * ------------------------------------
+   * This is a demo email function
+   * - Configure your email
+   * - Pass your values to the getEmail function
+   *    + Applies your values to an html
+   *      template
+   * - Send email
+   * @param array $values values to be sent
+   * @return bool
+   */
+  public function demo(array $values)
   {
     try {
       //Recipients
-      $this->mail->setFrom($this->fromEmail, 'NRG Lead Portal');
-      $this->mail->addReplyTo('no-reply@nrg.com', 'Do Not Reply');
+      $this->mail->setFrom($this->fromEmail, 'Levelup Demo');
+      $this->mail->addReplyTo('levelup@demo.com', 'Do Not Reply');
       $this->mail->addAddress($values['email']);
 
       // Content
       $this->mail->isHTML(true); // Set email format to HTML
-      $this->mail->Subject = 'Reset password request';
+      $this->mail->Subject = 'Levelup Demo';
 
-      $values['url'] =
-        "https://" .
-        $_SERVER['HTTP_HOST'] .
-        '/set-password?id=' .
-        $values['token'];
-
-      $body = $this->getEmail('forgot-password', $values);
-
-      $this->mail->Body = $body;
-      $this->mail->send();
-      return true;
-    } catch (Exception $e) {
-      echo $e;
-    }
-  }
-
-  public function newUser(array $values)
-  {
-    try {
-      //Recipients
-      $this->mail->setFrom($this->fromEmail, 'NRG Lead Portal');
-      $this->mail->addReplyTo('no-reply@nrg.com', 'Do Not Reply');
-      $this->mail->addAddress($values['email']);
-
-      // Content
-      $this->mail->isHTML(true); // Set email format to HTML
-      $this->mail->Subject = 'New user request';
-
-      $values['url'] =
-        "https://" . $_SERVER['HTTP_HOST'] . '/verify?id=' . $values['token'];
-
-      $body = $this->getEmail('new-user', $values);
-
-      $this->mail->Body = $body;
-      $this->mail->send();
-      return true;
-    } catch (Exception $e) {
-      echo $e;
-    }
-  }
-
-  public function mailLead(array $values)
-  {
-    try {
-      //Recipients
-      $this->mail->setFrom($this->fromEmail, 'NRG Lead Portal');
-      $this->mail->addReplyTo('no-reply@nrg.com', 'Do Not Reply');
-      $this->mail->addAddress($values['email']);
-
-      // Content
-      $this->mail->isHTML(true); // Set email format to HTML
-      $this->mail->Subject = 'New user request';
-
-      $values['url'] =
-        "https://" . $_SERVER['HTTP_HOST'] . '/verify?id=' . $values['token'];
-
-      $body = $this->getEmail('new-user', $values);
+      $body = $this->getEmail('demo', $values);
 
       $this->mail->Body = $body;
       $this->mail->send();
@@ -114,6 +70,9 @@ class Email
   /** ----------------------------------
    ** Return requested email template
    * -----------------------------------
+   * Insert an html template into an
+   *  email body
+   *
    * @param string $templateName
    * @param array $values to insert into template
    * @return string template
