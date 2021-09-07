@@ -11,6 +11,7 @@
   },
   "autoload": {
     "psr-4": {
+      "Controllers\\": "app/Controllers/",
       "Http\\": "app/Http/",
       "Mail\\": "app/Mail/",
       "Models\\": "app/Models/",
